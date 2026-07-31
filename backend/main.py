@@ -1,19 +1,13 @@
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
-
 from database import create_db_and_tables
 
+app = FastAPI(title="BadgerType API")
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
+# This runs when the server starts up
+@app.on_event("startup")
+def on_startup():
     create_db_and_tables()
-    yield
-
-
-app = FastAPI(title="BadgerType API", lifespan=lifespan)
-
-
+    
 @app.get("/health")
 def health_check():
-    return { "status": "ok" }
+    return {"status": "ok"}
