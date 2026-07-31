@@ -6,11 +6,6 @@ load_dotenv()
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-
-# Replace these values with your actual PostgreSQL credentials
-# Format: postgresql://username:password@host:port/database_name
-DATABASE_URL = "postgresql://postgres:mysecretpassword@localhost:5432/badgertype_db"
-
 # Create the engine (the core interface to the database)
 engine = create_engine(DATABASE_URL, echo=True)
 

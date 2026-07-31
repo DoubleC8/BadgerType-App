@@ -8,5 +8,5 @@ const TypingDisplay = ({ randomWords }) => {
     </div>
   );
 };
-
+``;
 export default TypingDisplay;
