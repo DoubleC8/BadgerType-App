@@ -3,31 +3,23 @@ import Header from "../components/Header";
 import TypingDisplay from "../components/TypingDisplay";
 import Cursor from "../components/Cursor";
 import { useEffect, useState } from "react";
-
-export const fetchQuote = async () => {
-  try {
-    // Fetching quote
-    const response = await fetch("http://localhost:8000/api/quote");
-    const data = await response.json();
-    return data.quote;
-  } catch (error) {
-    console.error("Failed to fetch quote: ", error);
-    //Fall back incase fetching does not work
-    return "The quick brown fox jumps over the lazy dog.";
-  }
-};
+import { fetchQuote } from "../services/api";
 
 function App() {
-  const [quoteText, setQuoteText] = useState("");
+  // const [quoteText, setQuoteText] = useState("");
 
-  useEffect(() => {
-    const getQuote = async () => {
-      const text = await fetchQuote();
-      setQuoteText(text);
-    };
+  // useEffect(() => {
+  //   const getQuote = async () => {
+  //     const text = await fetchQuote();
+  //     setQuoteText(text);
+  //   };
 
-    getQuote();
-  }, []);
+  //   getQuote();
+  // }, []);
+
+  const quoteText =
+    "The final door is about to open! And I am the one opening it! Then the world that we know of will come to an end! This world of insatiable desires will end!";
+
   return (
     <main
       className="md:px-6 md:py-3
@@ -35,10 +27,10 @@ function App() {
     >
       <section
         className="md:flex
-      hidden w-full h-full flex-col gap-3"
+      hidden w-full h-full flex-col gap-6"
       >
         <Header />
-        <TypingDisplay randomWords={quoteText} />
+        <TypingDisplay quote={quoteText} />
       </section>
       <DesktopOnlyNotice />
     </main>

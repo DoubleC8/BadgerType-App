@@ -30,12 +30,12 @@ def health_check():
 @app.get("/api/quote")
 def fetch_stoic_quote():
     try:
-        url = "https://stoic.tekloon.net/stoic-quote"
+        url = "https://api.animechan.io/v1/quotes/random"
         # requests handles the JSON parsing and SSL for us!
         response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
         data = response.json()
         
-        return {"quote": data["data"]["quote"]}
+        return {"quote": data["data"]["content"]}
     except Exception as e:
         print(f"Error Fetching quote: {e}")
         return {"quote": "The quick brown fox jumps over the lazy dog."}

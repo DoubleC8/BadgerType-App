@@ -8,7 +8,7 @@ const Cursor = () => {
       initial={{ opacity: 1 }}
       animate={{ opacity: 0 }}
       exit={{ opacity: 1 }}
-      transition={{ repeat: Infinity, duration: 0.5, ease: "easeInOut" }}
+      transition={{ repeat: Infinity, duration: 0.9, ease: "easeInOut" }}
     />
   );
 };
