@@ -1,28 +1,25 @@
 import DesktopOnlyNotice from "../components/DesktopOnlyNotice";
 import Header from "../components/Header";
+import Timer from "../components/Timer";
 import TypingDisplay from "../components/TypingDisplay";
-import Cursor from "../components/Cursor";
 import { useEffect, useState } from "react";
 import { fetchQuote } from "../services/api";
-import Timer from "../components/Timer";
 import useTypeEngine from "../hooks/useTypeEngine";
+import Results from "../components/Results";
 
 function App() {
-  // const [quoteText, setQuoteText] = useState("");
+  const [quoteText, setQuoteText] = useState("");
 
-  // useEffect(() => {
-  //   const getQuote = async () => {
-  //     const text = await fetchQuote();
-  //     setQuoteText(text);
-  //   };
+  useEffect(() => {
+    const getQuote = async () => {
+      const text = await fetchQuote();
+      setQuoteText(text);
+    };
 
-  //   getQuote();
-  // }, []);
+    getQuote();
+  }, []);
 
-  const quoteText =
-    "The final door is about to open! And I am the one opening it! Then the world that we know of will come to an end! This world of insatiable desires will end!";
-
-  const { userInput, startTime, endTime, timeElapsed } =
+  const { userInput, startTime, endTime, timeElapsed, wpm, accuracy } =
     useTypeEngine(quoteText);
 
   return (
@@ -41,6 +38,9 @@ function App() {
           timeElapsed={timeElapsed}
         />
         <TypingDisplay quote={quoteText} userInput={userInput} />
+        {endTime && (
+          <Results wpm={wpm} accuracy={accuracy} timeElapsed={timeElapsed} />
+        )}
       </section>
       <DesktopOnlyNotice />
     </main>

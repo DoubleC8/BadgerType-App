@@ -25,9 +25,9 @@ const TypingDisplay = ({ quote, userInput }) => {
 
                 if (globalIndex < userInput.length) {
                   if (char === userInput[globalIndex]) {
-                    colorClass = "text-(--green) bg-(--green)/50";
+                    colorClass = "text-(--green) bg-(--green)/20";
                   } else {
-                    colorClass = "text-(--red) bg-(--red)/50";
+                    colorClass = "text-(--red) bg-(--red)/20";
                   }
                 }
 

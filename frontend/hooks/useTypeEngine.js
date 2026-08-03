@@ -5,6 +5,8 @@ const useTypeEngine = (quote) => {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [wpm, setWmp] = useState(0);
+  const [accuracy, setAccuracy] = useState(0);
 
   // 1. The Keystroke Listener Effect
   useEffect(() => {
@@ -60,8 +62,38 @@ const useTypeEngine = (quote) => {
     return () => clearInterval(interval);
   }, [startTime, endTime]);
 
+  useEffect(() => {
+    if (endTime && startTime) {
+      // Calculating total mins
+      const totalMinutes = (endTime - startTime) / 60000;
+
+      // Calculating wpm
+      // By industry standard, 1 "word" = 5 keystrokes.
+      // So, total standard words typed = length of userInput / 5
+      const standardWords = userInput.length / 5;
+
+      const grossWpm = Math.round(standardWords / totalMinutes);
+
+      setWmp(grossWpm);
+
+      let correctChars = 0;
+
+      for (let i = 0; i < userInput.length; i++) {
+        if (userInput[i] === quote[i]) {
+          correctChars += 1;
+        }
+      }
+
+      const accuracyPercentage = Math.round(
+        (correctChars / quote.length) * 100,
+      );
+
+      setAccuracy(accuracyPercentage);
+    }
+  }, [userInput, quote, startTime, endTime]);
+
   // 3. Return the exact data the UI needs
-  return { userInput, startTime, endTime, timeElapsed };
+  return { userInput, startTime, endTime, timeElapsed, wpm, accuracy };
 };
 
 export default useTypeEngine;
