@@ -7,6 +7,7 @@ const useTypeEngine = (quote) => {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [wpm, setWmp] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
+  const [errors, setErrors] = useState(0);
 
   // 1. The Keystroke Listener Effect
   useEffect(() => {
@@ -88,12 +89,34 @@ const useTypeEngine = (quote) => {
         (correctChars / quote.length) * 100,
       );
 
+      const wrongChars = quote.length - correctChars;
+
       setAccuracy(accuracyPercentage);
+      setErrors(wrongChars);
     }
   }, [userInput, quote, startTime, endTime]);
 
+  const resetEngine = () => {
+    setUserInput("");
+    setStartTime(null);
+    setEndTime(null);
+    setTimeElapsed(0);
+    setWmp(0);
+    setAccuracy(0);
+    setErrors(0);
+  };
+
   // 3. Return the exact data the UI needs
-  return { userInput, startTime, endTime, timeElapsed, wpm, accuracy };
+  return {
+    userInput,
+    startTime,
+    endTime,
+    timeElapsed,
+    wpm,
+    accuracy,
+    errors,
+    resetEngine,
+  };
 };
 
 export default useTypeEngine;
