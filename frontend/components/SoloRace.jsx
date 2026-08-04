@@ -7,8 +7,10 @@ import Results from "../components/Results";
 import RetryButton from "../components/RetryButton";
 
 const SoloRace = () => {
-  const [quoteText, setQuoteText] = useState("");
+  // const [quoteText, setQuoteText] = useState("");
 
+  const quoteText =
+    "Success is getting what you want. Happiness is wanting what you get.";
   const {
     userInput,
     startTime,
@@ -20,16 +22,16 @@ const SoloRace = () => {
     resetEngine,
   } = useTypeEngine(quoteText);
 
-  const startNewGame = async () => {
-    resetEngine();
-    setQuoteText("Loading next quote...");
-    const text = await fetchQuote();
-    setQuoteText(text);
-  };
+  // const startNewGame = async () => {
+  //   resetEngine();
+  //   setQuoteText("Loading next quote...");
+  //   const text = await fetchQuote();
+  //   setQuoteText(text);
+  // };
 
-  useEffect(() => {
-    startNewGame();
-  }, []);
+  // useEffect(() => {
+  //   startNewGame();
+  // }, []);
 
   return (
     <div className="w-full h-full flex flex-col gap-6">
@@ -39,7 +41,7 @@ const SoloRace = () => {
           endTime={endTime}
           timeElapsed={timeElapsed}
         />
-        {endTime && <RetryButton onRetry={startNewGame} />}
+        {/**{endTime && <RetryButton onRetry={startNewGame} />} */}
       </div>
 
       <TypingDisplay quote={quoteText} userInput={userInput} />
