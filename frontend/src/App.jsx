@@ -9,7 +9,7 @@ function App() {
     p-3 h-screen w-full"
     >
       <section
-        className="md:flex
+        className="lg:flex
       hidden w-full h-full flex-col gap-6 font-(family-name:--geist)"
       >
         <Header />

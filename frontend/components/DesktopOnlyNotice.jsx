@@ -3,7 +3,7 @@ import { IoDesktopOutline } from "react-icons/io5";
 const DesktopOnlyNotice = () => {
   return (
     <section
-      className="md:hidden
+      className="lg:hidden
       h-screen"
     >
       <div className="h-1/2 flex flex-col gap-3 text-center justify-between">

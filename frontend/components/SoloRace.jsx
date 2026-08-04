@@ -18,6 +18,7 @@ const SoloRace = () => {
     timeElapsed,
     wpm,
     accuracy,
+
     errors,
     resetEngine,
   } = useTypeEngine(quoteText);
