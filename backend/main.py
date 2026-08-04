@@ -1,9 +1,11 @@
 import os
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
+import requests
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-import requests # Replaces urllib and json
+from socket_manager import manager
+from contextlib import asynccontextmanager
 from database import create_db_and_tables
+
 
 
 @asynccontextmanager
@@ -49,3 +51,23 @@ def fetch_stoic_quote():
     except Exception as e:
         print(f"Error Fetching quote: {e}")
         return {"quote": "The quick brown fox jumps over the lazy dog."}
+
+@app.websocket("/ws/{lobby_id}")
+async def websocket_endpoint(websocket: WebSocket, lobby_id: str):
+    # 1. Player calls in. The Switchboard Operator answers and puts them in the room.
+    await manager.connect(websocket, lobby_id)
+    
+    try:
+        # 2. Stay on the line forever, listening for any messages from this player
+        while True:
+            # Wait for the player to send a message (like "I typed the letter A")
+            data = await websocket.receive_text()
+            
+            # For now, just echo back what they said to prove the room works!
+            await manager.broadcast({"message": f"Someone in {lobby_id} said: {data}"}, lobby_id)
+            
+    except WebSocketDisconnect:
+        # 3. If the player closes their browser tab, the Operator hangs up the phone
+        manager.disconnect(websocket, lobby_id)
+        await manager.broadcast({"message": "A player has left the lobby."}, lobby_id)
+        
