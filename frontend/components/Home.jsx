@@ -15,15 +15,15 @@ const Home = () => {
       <div className="w-full flex justify-center gap-6">
         <button
           onClick={() => navigate("/solo")}
-          className="w-1/3 h-13 p-3 text-(--text-secondary) bg-(--bg-secondary) rounded-lg text-xl font-bold hover:cursor-pointer hover:opacity-80 ease-in-out duration-300"
+          className="w-1/5 h-13 p-3 text-(--text-secondary) bg-(--bg-secondary) rounded-lg text-xl font-bold hover:cursor-pointer hover:opacity-80 ease-in-out duration-300"
         >
-          Solo Practice
+          Solo
         </button>
         <button
           onClick={createLobby}
-          className="w-1/3 h-13 p-3 bg-(--accent) rounded-lg text-xl font-bold hover:cursor-pointer hover:opacity-80 ease-in-out duration-300"
+          className="w-1/5 h-13 p-3 bg-(--accent) rounded-lg text-xl font-bold hover:cursor-pointer hover:opacity-80 ease-in-out duration-300"
         >
-          Create Multiplayer Lobby
+          Multiplayer
         </button>
       </div>
     </div>
