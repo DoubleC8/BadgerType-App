@@ -21,7 +21,7 @@ const Home = () => {
         </button>
         <button
           onClick={createLobby}
-          className="w-1/5 h-13 p-3 bg-(--accent) rounded-lg text-xl font-bold hover:cursor-pointer hover:opacity-80 ease-in-out duration-300"
+          className="w-1/5 h-13 p-3 bg-(--accent) text-(--text) rounded-lg text-xl font-bold hover:cursor-pointer hover:opacity-80 ease-in-out duration-300"
         >
           Multiplayer
         </button>
