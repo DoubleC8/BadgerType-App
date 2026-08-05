@@ -17,6 +17,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/solo" element={<SoloRace />} />
             <Route path="/lobby/:lobbyId" element={<MultiplayerLobby />} />
+            <Route
+              path="/arena/:lobbyId"
+              element={<h1 className="text-(--text)">ARENA READY</h1>}
+            />
           </Routes>
         </section>
         <DesktopOnlyNotice />
