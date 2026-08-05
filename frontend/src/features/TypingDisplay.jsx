@@ -1,6 +1,5 @@
-// src/components/TypingDisplay.jsx
 import React from "react";
-import Cursor from "./Cursor";
+import Cursor from "../components/Cursor";
 
 const TypingDisplay = ({ quote, userInput }) => {
   const words = quote ? quote.split(" ") : [];

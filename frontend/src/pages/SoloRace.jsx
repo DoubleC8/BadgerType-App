@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import { fetchQuote } from "../services/api";
-import useTypeEngine from "../hooks/useTypeEngine";
 import Timer from "../components/Timer";
-import TypingDisplay from "../components/TypingDisplay";
-import Results from "../components/Results";
-import RetryButton from "../components/RetryButton";
+import TypingDisplay from "../features/TypingDisplay";
+import Results from "../features/Results";
+import useTypeEngine from "../hooks/useTypeEngine";
 
 const SoloRace = () => {
   // const [quoteText, setQuoteText] = useState("");

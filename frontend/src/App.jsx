@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import DesktopOnlyNotice from "../components/DesktopOnlyNotice";
-import Header from "../components/Header";
-import SoloRace from "../components/SoloRace";
-import Home from "../components/Home";
-import MultiplayerLobby from "../components/MultiplayerLobby";
+import Header from "./components/Header";
+import Home from "./pages/Home";
+import SoloRace from "./pages/SoloRace";
+import MultiplayerLobby from "./pages/MultiplayerLobby";
+import DesktopOnlyNotice from "./components/DesktopOnlyNotice";
 
 function App() {
   return (

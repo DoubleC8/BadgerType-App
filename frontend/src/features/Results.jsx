@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import StatBox from "./StatBox";
+import StatBox from "../components/StatBox";
 
 const Results = ({ timeElapsed, wpm, accuracy, errors }) => {
   return (

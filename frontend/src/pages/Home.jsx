@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import TypewriterText from "./TypewriterText";
+import TypewriterText from "../components/TypewriterText";
 
 const Home = () => {
   const navigate = useNavigate();

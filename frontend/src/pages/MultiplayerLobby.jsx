@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { motion, useAnimation } from "motion/react";
-import TypewriterText from "./TypewriterText";
+import TypewriterText from "../components/TypewriterText";
 
 const MultiplayerLobby = () => {
   const { lobbyId } = useParams();
