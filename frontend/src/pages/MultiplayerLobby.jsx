@@ -26,14 +26,14 @@ const MultiplayerLobby = () => {
       // If the server tells us someone joined, update the count!
       if (data.type === "player_joined") {
         setPlayerCount(data.total_players);
+      }
 
-        // If the room is full (2 players), redirect to the arena!
-        if (data.total_players === 2) {
-          // We wait 1 second so players can see the "Opponent Found!" message
-          setTimeout(() => {
-            navigate(`/arena/${lobbyId}`);
-          }, 1000);
-        }
+      // NEW: Wait for the authoritative server to officially hand us the quote!
+      if (data.type === "game_start") {
+        setTimeout(() => {
+          // We pass the quote securely into the Arena via React Router state
+          navigate(`/arena/${lobbyId}`, { state: { quote: data.quote } });
+        }, 1000);
       }
 
       // Handle someone leaving the lobby
@@ -85,7 +85,7 @@ const MultiplayerLobby = () => {
                 onClick={handleCopyLink}
                 className="h-12 w-3/10 px-3 py-1 flex flex-col justify-center bg-(--accent) rounded-lg font-bold text-xl hover:cursor-pointer duration-300 ease-in-out"
               >
-                {copied ? "Copied!" : "Copy Link"}
+                {copied ? "Copied!" : "Link"}
               </button>
             </div>
           </div>

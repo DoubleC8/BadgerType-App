@@ -65,6 +65,17 @@ async def websocket_endpoint(websocket: WebSocket, lobby_id: str):
         "total_players": current_players
     }, lobby_id)
     
+    # --- The Game Start Logic ---
+    if current_players == 2:
+        # Fetch the authoritative quote from the server
+        game_quote = manager.fetch_game_quote()
+        
+        await manager.broadcast({
+            "type": "game_start", 
+            "quote": game_quote
+        }, lobby_id)
+        
+    
     try:
         # 2. Stay on the line forever, listening for any messages from this player
         while True:

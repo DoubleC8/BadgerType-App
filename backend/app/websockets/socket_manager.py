@@ -1,3 +1,5 @@
+import os
+import requests
 from fastapi import WebSocket
 
 class ConnectionManager:
@@ -6,6 +8,26 @@ class ConnectionManager:
         # The key is the room number (lobby_id).
         # The value is a list of active phone lines (WebSockets) in that room.
         self.active_lobbies: dict[str, list[WebSocket]] = {}
+    
+    def fetch_game_quote(self):
+        try:
+            url = "https://api.api-ninjas.com/v2/randomquotes?categories=success%2Ccourage%2Cinspirational%2Cleadership"
+            api_key = os.getenv("API_KEY")
+            
+            if api_key is None:
+                print("Warning: API_KEY not found in environment variables.")
+                return "The quick brown fox jumps over the lazy dog."
+            
+            response = requests.get(url, headers={'X-Api-Key': api_key}, timeout=5)
+            response.raise_for_status()
+            data = response.json()
+            
+            return data[0]["quote"]
+        
+        except Exception as e:
+            print(f"Error fetching quote: {e}")
+            return "The quick brown fox jumps over the lazy dog."
+            
 
     async def connect(self, websocket: WebSocket, lobby_id: str):
         # 1. Answer the incoming phone call
@@ -38,11 +60,13 @@ class ConnectionManager:
                 print(f"Lobby {lobby_id} deleted.")
 
     async def broadcast(self, message: dict, lobby_id: str):
-        # Shout a message into the room so everyone in it can hear it
         if lobby_id in self.active_lobbies:
-            for connection in self.active_lobbies[lobby_id]:
-                # We send the data as a JSON object, which React loves
-                await connection.send_json(message)
+            # We iterate over a copy of the list using list() to prevent errors if a socket is removed mid-broadcast
+            for connection in list(self.active_lobbies[lobby_id]):
+                try:
+                    await connection.send_json(message)
+                except Exception as e:
+                    print(f"Failed to send message to a closed socket: {e}")
 
 # Finally, we hire our single global Switchboard Operator
 manager = ConnectionManager()
