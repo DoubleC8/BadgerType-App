@@ -14,14 +14,21 @@ class ConnectionManager:
         # 2. If this lobby doesn't exist yet, build the room!
         if lobby_id not in self.active_lobbies:
             self.active_lobbies[lobby_id] = []
+        
+        # 3. Prevent overcrodwing: Only allow 2 players max (for now)
+        if len(self.active_lobbies[lobby_id]) >= 2:
+            await websocket.close(code=1008)
+            return False
 
-        # 3. Put the player's phone line into the room
+        # 4. Put the player's phone line into the room
         self.active_lobbies[lobby_id].append(websocket)
         print(f"Player joined lobby: {lobby_id}. Total players: {len(self.active_lobbies[lobby_id])}")
+        
+        return True
 
     def disconnect(self, websocket: WebSocket, lobby_id: str):
         # 1. Unplug the player's phone line from the room
-        if lobby_id in self.active_lobbies:
+        if lobby_id in self.active_lobbies and websocket in self.active_lobbies[lobby_id]:
             self.active_lobbies[lobby_id].remove(websocket)
             print(f"Player left lobby: {lobby_id}.")
 

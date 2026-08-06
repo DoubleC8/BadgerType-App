@@ -7,7 +7,7 @@ const MultiplayerLobby = () => {
   const { lobbyId } = useParams();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
-  const [socket, setSockets] = useState(null);
+  const [socket, setSocket] = useState(null);
   const [playerCount, setPlayerCount] = useState(1);
 
   useEffect(() => {
@@ -61,6 +61,10 @@ const MultiplayerLobby = () => {
         <motion.h1
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
+          transition={{
+            duration: 6.2,
+            times: [0, 0.05, 0.8, 1],
+          }}
           className="text-3xl font-bold text-(--accent)"
         >
           Opponent Found! Starting race...
