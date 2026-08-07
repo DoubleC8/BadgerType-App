@@ -32,9 +32,12 @@ const useTypeEngine = (quote) => {
         setUserInput((prev) => prev.slice(0, -1));
       } else if (e.key.length === 1) {
         setUserInput((prev) => {
+          // Cap the length so they can't type past the end of the quote!
+          if (quote && prev.length >= quote.length) return prev;
+
           const nextInput = prev + e.key;
 
-          if (quote && nextInput.length === quote.length) {
+          if (quote && nextInput === quote) {
             setEndTime(Date.now());
           }
 

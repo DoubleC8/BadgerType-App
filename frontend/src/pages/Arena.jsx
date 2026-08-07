@@ -1,4 +1,4 @@
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import useTypeEngine from "../hooks/useTypeEngine";
 import TypingDisplay from "../features/TypingDisplay";
@@ -10,6 +10,7 @@ import Button from "../components/Button";
 const Arena = () => {
   const { lobbyId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Grab the authoritative quote the server handed us in the Lobby!
   const quote = location.state?.quote || "Fallback quote just in case!";
@@ -18,6 +19,10 @@ const Arena = () => {
   const [socket, setSocket] = useState(null);
   const [opponentProgress, setOpponentProgress] = useState(0);
   const [matchResult, setMatchResult] = useState(null);
+
+  const leaveMatch = () => {
+    navigate("/");
+  };
 
   // 1. Establish the Arena WebSocket Connection
   useEffect(() => {
@@ -79,7 +84,12 @@ const Arena = () => {
       {matchResult && (
         <div className="w-full flex justify-center gap-6">
           <Button title={"Rematch"} buttonColor={"accent"} textColor={"text"} />
-          <Button title={"Leave"} buttonColor={"red"} textColor={"text"} />
+          <Button
+            onAction={leaveMatch}
+            title={"Leave"}
+            buttonColor={"red"}
+            textColor={"text"}
+          />
         </div>
       )}
     </div>

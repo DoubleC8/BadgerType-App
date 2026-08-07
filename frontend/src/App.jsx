@@ -12,7 +12,6 @@ function App() {
       <main className="md:px-6 md:py-3 p-3 h-screen w-full">
         <section className="lg:flex hidden w-full h-full flex-col gap-6 font-(family-name:--geist)">
           <Header />
-
           {/* The Router dictates which component sits below the Header */}
           <Routes>
             <Route path="/" element={<Home />} />
