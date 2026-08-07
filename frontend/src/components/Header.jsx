@@ -1,6 +1,7 @@
 import { FaStar } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
+import AuthSync from "./AuthSync";
 
 const Header = () => {
   return (
@@ -13,12 +14,13 @@ const Header = () => {
         <FaStar className="text-(--accent)" />
         <p className="text-2xl">Type Fast. Fear Nothing.</p>
       </div>
-      <div className="flex gap-3 items-center">
+      <div className="flex gap-3 items-center font-(family-name:--geist)">
         <Show when="signed-out">
           <SignInButton />
           <SignUpButton />
         </Show>
         <Show when="signed-in">
+          <AuthSync />
           <UserButton />
         </Show>
       </div>
