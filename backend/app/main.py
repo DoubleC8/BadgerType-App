@@ -32,7 +32,7 @@ def health_check():
 @app.get("/api/quote")
 def fetch_stoic_quote():
     try:
-        url = "https://api.api-ninjas.com/v2/randomquotes?categories=success%2Ccourage%2Cinspirational%2Cleadership"
+        url = "https://api.api-ninjas.com/v2/randomquotes"
         api_key = os.getenv("API_KEY")
         
         if api_key is None:

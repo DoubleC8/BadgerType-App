@@ -42,7 +42,11 @@ const SoloRace = () => {
         {endTime && <RetryButton onRetry={startNewGame} />}
       </div>
 
-      <TypingDisplay quote={quoteText} userInput={userInput} />
+      <TypingDisplay
+        quote={quoteText}
+        userInput={userInput}
+        multiplayer={false}
+      />
 
       {endTime && (
         <Results
