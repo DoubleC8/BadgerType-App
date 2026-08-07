@@ -8,6 +8,9 @@ class ConnectionManager:
         # The key is the room number (lobby_id).
         # The value is a list of active phone lines (WebSockets) in that room.
         self.active_lobbies: dict[str, list[WebSocket]] = {}
+        
+        # Track rematch votes per lobby
+        self.rematch_votes: dict[str, int] = {}
     
     def fetch_game_quote(self):
         try:
@@ -41,6 +44,9 @@ class ConnectionManager:
         if len(self.active_lobbies[lobby_id]) >= 2:
             await websocket.close(code=1008)
             return False
+        
+        if lobby_id not in self.rematch_votes:
+            self.rematch_votes[lobby_id] = 0
 
         # 4. Put the player's phone line into the room
         self.active_lobbies[lobby_id].append(websocket)
@@ -58,6 +64,11 @@ class ConnectionManager:
             if len(self.active_lobbies[lobby_id]) == 0:
                 del self.active_lobbies[lobby_id]
                 print(f"Lobby {lobby_id} deleted.")
+            
+            if len(self.active_lobbies[lobby_id]) == 0:
+                del self.active_lobbies[lobby_id]
+                if lobby_id in self.rematch_votes:
+                    del self.rematch_votes[lobby_id]
 
     async def broadcast(self, message: dict, lobby_id: str, sender: WebSocket = None):
         if lobby_id in self.active_lobbies:

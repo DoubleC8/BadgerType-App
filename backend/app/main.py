@@ -82,8 +82,16 @@ async def websocket_endpoint(websocket: WebSocket, lobby_id: str):
             # Wait for the player to send a message (like "I typed the letter A")
             data = await websocket.receive_json()            
             
+            if data.get("type") == "rematch":
+                manager.rematch_votes[lobby_id] += 1
+                
+                if manager.rematch_votes[lobby_id] == 2:
+                    manager.rematch_votes[lobby_id] = 0
+                    new_quote = manager.fetch_game_quote()
+                    await manager.broadcast({"type": "game_start", "quote": new_quote}, lobby_id)
+                    
+                continue
             
-            # For now, just echo back what they said to prove the room works!
             await manager.broadcast(data, lobby_id, sender=websocket)
             
     except WebSocketDisconnect:

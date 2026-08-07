@@ -12,22 +12,32 @@ const Arena = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Grab the authoritative quote the server handed us in the Lobby!
-  const quote = location.state?.quote || "Fallback quote just in case!";
+  const [quote, setQuote] = useState(
+    location.state?.quote || "Fallback quote just in case!",
+  );
+  const [rematchRequested, setRematchRequested] = useState(false);
 
-  const { userInput, startTime, endTime, wpm, accuracy } = useTypeEngine(quote);
+  const { userInput, startTime, endTime, wpm, accuracy, resetEngine } =
+    useTypeEngine(quote);
   const [socket, setSocket] = useState(null);
   const [opponentProgress, setOpponentProgress] = useState(0);
   const [matchResult, setMatchResult] = useState(null);
+  const [opponentLeft, setOpponentLeft] = useState(false);
 
   const leaveMatch = () => {
     navigate("/");
   };
 
+  const handleRematch = () => {
+    setRematchRequested(true);
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "rematch" }));
+    }
+  };
+
   // 1. Establish the Arena WebSocket Connection
   useEffect(() => {
     const ws = new WebSocket(`ws://localhost:8000/ws/${lobbyId}`);
-
     ws.onopen = () => setSocket(ws);
 
     ws.onmessage = (event) => {
@@ -40,8 +50,19 @@ const Arena = () => {
 
       if (data.type === "finished") {
         setOpponentProgress(100);
-
         setMatchResult((prev) => (prev ? prev : "Loss"));
+      }
+
+      if (data.type === "game_start") {
+        setQuote(data.quote);
+        setMatchResult(null);
+        setOpponentProgress(0);
+        setRematchRequested(false);
+        resetEngine();
+      }
+
+      if (data.type === "player_left") {
+        setOpponentLeft(true);
       }
     };
 
@@ -82,8 +103,26 @@ const Arena = () => {
       )}
       <TypingDisplay quote={quote} userInput={userInput} multiplayer={true} />
       {matchResult && (
-        <div className="w-full flex justify-center gap-6">
-          <Button title={"Rematch"} buttonColor={"accent"} textColor={"text"} />
+        <div className="w-full flex items-center justify-center gap-6">
+          {rematchRequested ? (
+            opponentLeft ? (
+              <p className="text-2xl text-(--red) font-bold animate-pulse">
+                Opponent has left the lobby.
+              </p>
+            ) : (
+              <div className="w-1/5 h-13 p-3 flex items-center justify-center bg-(--bg-secondary) border-2 border-dashed border-(--accent) text-(--text-secondary) rounded-lg text-xl font-bold">
+                <p className="animate-pulse">Waiting for opponent...</p>
+              </div>
+            )
+          ) : (
+            <Button
+              onAction={handleRematch}
+              title={"Rematch"}
+              buttonColor={"accent"}
+              textColor={"text"}
+            />
+          )}
+
           <Button
             onAction={leaveMatch}
             title={"Leave"}
