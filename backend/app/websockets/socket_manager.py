@@ -59,10 +59,14 @@ class ConnectionManager:
                 del self.active_lobbies[lobby_id]
                 print(f"Lobby {lobby_id} deleted.")
 
-    async def broadcast(self, message: dict, lobby_id: str):
+    async def broadcast(self, message: dict, lobby_id: str, sender: WebSocket = None):
         if lobby_id in self.active_lobbies:
             # We iterate over a copy of the list using list() to prevent errors if a socket is removed mid-broadcast
             for connection in list(self.active_lobbies[lobby_id]):
+                # If this connection is the person who sent the message, skip them
+                if sender and connection == sender:
+                    continue
+                
                 try:
                     await connection.send_json(message)
                 except Exception as e:

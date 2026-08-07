@@ -80,10 +80,11 @@ async def websocket_endpoint(websocket: WebSocket, lobby_id: str):
         # 2. Stay on the line forever, listening for any messages from this player
         while True:
             # Wait for the player to send a message (like "I typed the letter A")
-            data = await websocket.receive_text()
+            data = await websocket.receive_json()            
+            
             
             # For now, just echo back what they said to prove the room works!
-            await manager.broadcast({"message": f"Someone in {lobby_id} said: {data}"}, lobby_id)
+            await manager.broadcast(data, lobby_id, sender=websocket)
             
     except WebSocketDisconnect:
         # 3. If the player closes their browser tab, the Operator hangs up the phone
