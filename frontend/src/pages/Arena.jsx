@@ -14,6 +14,7 @@ const Arena = () => {
   const { userInput, startTime, endTime, wpm, accuracy } = useTypeEngine(quote);
   const [socket, setSocket] = useState(null);
   const [opponentProgress, setOpponentProgress] = useState(0);
+  const [matchResult, setMatchResult] = useState(null);
 
   // 1. Establish the Arena WebSocket Connection
   useEffect(() => {
@@ -27,6 +28,12 @@ const Arena = () => {
       // Listen specifically for the opponent's progress updates
       if (data.type === "progress") {
         setOpponentProgress(data.progress);
+      }
+
+      if (data.type === "finished") {
+        setOpponentProgress(100);
+
+        setMatchResult((prev) => (prev ? prev : "Loss"));
       }
     };
 
@@ -44,11 +51,20 @@ const Arena = () => {
     }
   }, [userInput, socket, quote.length]);
 
+  useEffect(() => {
+    if (endTime && socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "finished" }));
+
+      setMatchResult((prev) => (prev ? prev : "Win"));
+    }
+  }, [endTime, socket]);
+
   return (
     <div className="w-full h-full flex flex-col gap-6 font-(family-name:--geist)">
-      <div className="w-full flex justify-between items-center text-(--text-secondary)">
-        <h1 className="text-2xl font-bold tracking-widest">Arena: {lobbyId}</h1>
-        {/* Temporary UI just to prove the numbers are syncing! */}
+      <div className="w-full flex flex-col gap-6 text-(--text-secondary)">
+        <h1 className="text-3xl font-bold tracking-widest">
+          Arena: <span className="text-(--accent)">{lobbyId}</span>
+        </h1>
         <div className="w-full flex flex-col gap-4 p-4 bg-black border-2 border-dashed border-(--border) rounded-lg">
           {/* We calculate your progress live just for the visual bar */}
           <ProgressBar
@@ -58,7 +74,19 @@ const Arena = () => {
           <ProgressBar progress={opponentProgress} label="Opponent" />
         </div>
       </div>
-
+      {matchResult && (
+        <div className="w-full p-6 flex flex-col items-center justify-center bg-(--bg-secondary) border-4 border-(--accent) rounded-lg mb-6">
+          <h1 className="text-6xl font-bold text-(--accent) mb-4">
+            {matchResult === "Win" ? "YOU WON!" : "YOU LOST!"}
+          </h1>
+          {endTime && (
+            <p className="text-2xl text-white">
+              Your Speed:{" "}
+              <span className="text-(--accent) font-bold">{wpm} WPM</span>
+            </p>
+          )}
+        </div>
+      )}
       <TypingDisplay quote={quote} userInput={userInput} />
     </div>
   );

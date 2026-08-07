@@ -1,7 +1,7 @@
 const ProgressBar = ({ progress, label }) => {
   return (
-    <div className="w-full flex flex-col gap-2 font-(family-name:--geist)">
-      <div className="flex justify-between text-sm font-bold text-(--text-secondary)">
+    <div className="w-full flex flex-col gap-3 font-(family-name:--geist)">
+      <div className="flex justify-between text-base font-bold text-(--text-secondary)">
         <span>{label}</span>
         <span>{Math.round(progress)}%</span>
       </div>

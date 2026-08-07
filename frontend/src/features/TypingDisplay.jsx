@@ -5,7 +5,7 @@ const TypingDisplay = ({ quote, userInput }) => {
   const words = quote ? quote.split(" ") : [];
 
   return (
-    <div className="min-h-1/2 max-h-fit p-3 border-4 border-dashed border-(--accent) rounded-lg bg-(--bg-secondary) flex items-center font-(family-name:--geist)">
+    <div className="min-h-6/10 px-3 py-6 border-4 border-dashed border-(--accent) rounded-lg bg-(--bg-secondary) flex items-center font-(family-name:--geist)">
       <div className="text-(--text-secondary) text-4xl tracking-widest flex flex-wrap gap-y-3">
         {words.map((word, wordIdx) => {
           const wordWithSpace =
