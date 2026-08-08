@@ -5,6 +5,7 @@ import SoloRace from "./pages/SoloRace";
 import MultiplayerLobby from "./pages/MultiplayerLobby";
 import DesktopOnlyNotice from "./components/DesktopOnlyNotice";
 import Arena from "./pages/Arena";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/solo" element={<SoloRace />} />
             <Route path="/lobby/:lobbyId" element={<MultiplayerLobby />} />
             <Route path="/arena/:lobbyId" element={<Arena />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </section>
         <DesktopOnlyNotice />
