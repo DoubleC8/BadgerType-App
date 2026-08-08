@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Timer from "../components/Timer";
 import TypingDisplay from "../features/TypingDisplay";
 import Results from "../features/Results";
@@ -10,6 +10,8 @@ import { useUser } from "@clerk/react";
 const SoloRace = () => {
   const [quoteText, setQuoteText] = useState("");
   const { user, isSignedIn } = useUser();
+
+  const hasSavedMatch = useRef(false);
 
   const {
     userInput,
@@ -24,6 +26,8 @@ const SoloRace = () => {
 
   const startNewGame = async () => {
     resetEngine();
+    // Reset the lock every time they start a new race
+    hasSavedMatch.current = false;
     setQuoteText("Loading next quote...");
     const text = await fetchQuote();
     setQuoteText(text);
@@ -34,7 +38,8 @@ const SoloRace = () => {
   }, []);
 
   useEffect(() => {
-    if (endTime && user && isSignedIn) {
+    if (endTime && wpm > 0 && user && isSignedIn && !hasSavedMatch.current) {
+      hasSavedMatch.current = true;
       fetch("http://localhost:8000/api/matches", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

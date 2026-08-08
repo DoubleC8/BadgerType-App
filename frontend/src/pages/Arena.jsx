@@ -1,5 +1,5 @@
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import useTypeEngine from "../hooks/useTypeEngine";
 import TypingDisplay from "../features/TypingDisplay";
 import ProgressBar from "../components/ProgressBar";
@@ -22,9 +22,13 @@ const Arena = () => {
   const { userInput, startTime, endTime, wpm, accuracy, resetEngine } =
     useTypeEngine(quote);
   const [socket, setSocket] = useState(null);
+
   const [opponentProgress, setOpponentProgress] = useState(0);
   const [matchResult, setMatchResult] = useState(null);
   const [opponentLeft, setOpponentLeft] = useState(false);
+
+  const hasBroadcastFinish = useRef(false);
+  const hasSavedMatch = useRef(false);
 
   const leaveMatch = () => {
     navigate("/");
@@ -37,7 +41,6 @@ const Arena = () => {
     }
   };
 
-  // 1. Establish the Arena WebSocket Connection
   useEffect(() => {
     const ws = new WebSocket(`ws://localhost:8000/ws/${lobbyId}`);
     ws.onopen = () => setSocket(ws);
@@ -45,7 +48,6 @@ const Arena = () => {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      // Listen specifically for the opponent's progress updates
       if (data.type === "progress") {
         setOpponentProgress(data.progress);
       }
@@ -61,6 +63,9 @@ const Arena = () => {
         setOpponentProgress(0);
         setRematchRequested(false);
         resetEngine();
+
+        hasBroadcastFinish.current = false;
+        hasSavedMatch.current = false;
       }
 
       if (data.type === "player_left") {
@@ -71,7 +76,6 @@ const Arena = () => {
     return () => ws.close();
   }, [lobbyId]);
 
-  // 2. Broadcast YOUR progress every time you press a valid key
   useEffect(() => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       // Calculate how far along you are (0 to 100)
@@ -83,21 +87,35 @@ const Arena = () => {
   }, [userInput, socket, quote.length]);
 
   useEffect(() => {
-    if (endTime && socket && socket.readyState === WebSocket.OPEN) {
+    if (
+      endTime &&
+      socket &&
+      socket.readyState === WebSocket.OPEN &&
+      !hasBroadcastFinish.current
+    ) {
+      hasBroadcastFinish.current = true;
       socket.send(JSON.stringify({ type: "finished" }));
       setMatchResult((prev) => (prev ? prev : "Win"));
+    }
 
-      if (isSignedIn && user) {
-        fetch("http://localhost:8000/api/matches", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            clerk_id: user.id,
-            wpm: wpm,
-            accuracy: accuracy,
-          }),
-        }).catch((err) => console.error("Failed to save match: ", err));
-      }
+    if (
+      endTime &&
+      wpm > 0 &&
+      socket &&
+      isSignedIn &&
+      user &&
+      !hasSavedMatch.current
+    ) {
+      hasSavedMatch.current = true;
+      fetch("http://localhost:8000/api/matches", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clerk_id: user.id,
+          wpm: wpm,
+          accuracy: accuracy,
+        }),
+      }).catch((err) => console.error("Failed to save match: ", err));
     }
   }, [endTime, socket, isSignedIn, user, wpm, accuracy]);
 

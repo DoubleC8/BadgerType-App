@@ -12,7 +12,11 @@ if (!PUBLISHABLE_KEY) {
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        cssLayerName: "clerk",
+      }}
+    >
       <App />
     </ClerkProvider>
   </StrictMode>,
