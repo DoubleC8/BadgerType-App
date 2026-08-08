@@ -5,9 +5,11 @@ import Results from "../features/Results";
 import useTypeEngine from "../hooks/useTypeEngine";
 import { fetchQuote } from "../services/api";
 import RetryButton from "../components/RetryButton";
+import { useUser } from "@clerk/react";
 
 const SoloRace = () => {
   const [quoteText, setQuoteText] = useState("");
+  const { user, isSignedIn } = useUser();
 
   const {
     userInput,
@@ -30,6 +32,20 @@ const SoloRace = () => {
   useEffect(() => {
     startNewGame();
   }, []);
+
+  useEffect(() => {
+    if (endTime && user && isSignedIn) {
+      fetch("http://localhost:8000/api/matches", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clerk_id: user.id,
+          wpm: wpm,
+          accuracy: accuracy,
+        }),
+      }).catch((err) => console.error("Failed to save solo match: ", err));
+    }
+  }, [endTime, isSignedIn, user, wpm, accuracy]);
 
   return (
     <div className="w-full h-full flex flex-col gap-6">

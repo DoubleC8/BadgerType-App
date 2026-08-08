@@ -6,11 +6,13 @@ import ProgressBar from "../components/ProgressBar";
 import MatchResult from "../components/MatchResult";
 import MatchProgress from "../components/MatchProgress";
 import Button from "../components/Button";
+import { useUser } from "@clerk/react";
 
 const Arena = () => {
   const { lobbyId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isSignedIn } = useUser();
 
   const [quote, setQuote] = useState(
     location.state?.quote || "Fallback quote just in case!",
@@ -83,10 +85,21 @@ const Arena = () => {
   useEffect(() => {
     if (endTime && socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({ type: "finished" }));
-
       setMatchResult((prev) => (prev ? prev : "Win"));
+
+      if (isSignedIn && user) {
+        fetch("http://localhost:8000/api/matches", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clerk_id: user.id,
+            wpm: wpm,
+            accuracy: accuracy,
+          }),
+        }).catch((err) => console.error("Failed to save match: ", err));
+      }
     }
-  }, [endTime, socket]);
+  }, [endTime, socket, isSignedIn, user, wpm, accuracy]);
 
   return (
     <div className="w-full h-full flex flex-col gap-6 font-(family-name:--geist)">
