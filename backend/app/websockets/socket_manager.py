@@ -14,7 +14,7 @@ class ConnectionManager:
     
     def fetch_game_quote(self):
         try:
-            url = "https://api.api-ninjas.com/v2/randomquotes?categories=success%2Ccourage%2Cinspirational%2Cleadership"
+            url = "https://api.api-ninjas.com/v2/randomquotes"
             api_key = os.getenv("API_KEY")
             
             if api_key is None:
@@ -64,9 +64,7 @@ class ConnectionManager:
             if len(self.active_lobbies[lobby_id]) == 0:
                 del self.active_lobbies[lobby_id]
                 print(f"Lobby {lobby_id} deleted.")
-            
-            if len(self.active_lobbies[lobby_id]) == 0:
-                del self.active_lobbies[lobby_id]
+                
                 if lobby_id in self.rematch_votes:
                     del self.rematch_votes[lobby_id]
 

@@ -1,10 +1,24 @@
 import os
 import requests
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel
+from sqlmodel import select, Session
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.websockets.socket_manager import manager
 from contextlib import asynccontextmanager
 from app.core.database import create_db_and_tables
+from app.core.database import get_session
+from app.models.models import User, Match
+
+class UserSync(BaseModel):
+    clerk_id: str
+    username: str
+    profile_picture: str | None = None
+
+class MatchSubmit(BaseModel):
+    clerk_id: str
+    wpm: float
+    accuracy: float
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -49,6 +63,50 @@ def fetch_stoic_quote():
     except Exception as e:
         print(f"Error Fetching quote: {e}")
         return {"quote": "The quick brown fox jumps over the lazy dog."}
+
+@app.post("/api/auth/sync")
+def sync_user(user_data: UserSync, db: Session = Depends(get_session)):
+    # Check if this Clerk user is already in our Neon database
+    statement = select(User).where(User.clerk_id == user_data.clerk_id)
+    existing_user = db.exec(statement).first()
+
+    if existing_user:
+        # If they exist, just update their profile pic in case they changed it on GitHub
+        existing_user.profile_picture = user_data.profile_picture
+        db.add(existing_user)
+        db.commit()
+        return {"message": "User synced successfully", "user": existing_user}
+
+    # If they DO NOT exist, create a fresh row in the Neon database
+    new_user = User(
+        clerk_id=user_data.clerk_id,
+        username=user_data.username,
+        profile_picture=user_data.profile_picture
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    return {"message": "User created in database", "user": new_user}
+
+@app.post("/api/matches")
+def save_match(match_data: MatchSubmit, db: Session = Depends(get_session)):
+    statement = select(User).where(User.clerk_id == match_data.clerk_id)
+    user = db.exec(statement).first()
+    
+    if not user:
+        return {"error": "User not found in database"}
+    
+    new_match = Match(
+        player1_id=user.id, 
+        p1_wpm=match_data.wpm, 
+        p1_accuracy=match_data.accuracy
+    )
+    
+    db.add(new_match)
+    db.commit()
+    
+    return {"message": "Match successfully recorded!"}
 
 @app.websocket("/ws/{lobby_id}")
 async def websocket_endpoint(websocket: WebSocket, lobby_id: str):

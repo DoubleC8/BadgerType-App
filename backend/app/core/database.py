@@ -1,6 +1,7 @@
-import os
 from sqlmodel import SQLModel, create_engine, Session
+from app.models.models import User, Match
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
