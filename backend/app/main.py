@@ -1,7 +1,7 @@
 import os
 import requests
 from pydantic import BaseModel
-from sqlmodel import select, Session
+from sqlmodel import select, Session, func
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.websockets.socket_manager import manager
@@ -107,6 +107,52 @@ def save_match(match_data: MatchSubmit, db: Session = Depends(get_session)):
     db.commit()
     
     return {"message": "Match successfully recorded!"}
+
+@app.get("/api/users/{clerk_id}/stats")
+def get_user_stats(clerk_id: str, db: Session = Depends(get_session)):
+    user = db.exec(select(User).where(User.clerk_id == clerk_id)).first()
+    
+    if not user:
+        return {"error": "User not found"}
+    
+    # CORRECT: order_by is attached to the select() statement before execution
+    matches = db.exec(select(Match).where(Match.player1_id == user.id).order_by(Match.created_at.desc())).all()
+    
+    total_races = len(matches)
+    
+    if total_races == 0:
+        return {
+            "username": user.username,
+            "profile_picture": user.profile_picture,
+            "total_races": 0,
+            "avg_wpm": 0,
+            "avg_accuracy": 0,
+            "best_wpm": 0, 
+            "recent_matches": [],
+        }
+    
+    avg_wpm = round(sum(m.p1_wpm for m in matches) / total_races, 1)
+    avg_accuracy = round(sum(m.p1_accuracy for m in matches) / total_races, 1)
+    best_wpm = round(max(m.p1_wpm for m in matches), 1)
+    
+    recent_matches = [
+        {
+            "wpm": round(m.p1_wpm, 1),
+            "accuracy": round(m.p1_accuracy, 1),
+            "date": m.created_at.strftime("%b %d, %Y")
+        }
+        for m in matches[:10]
+    ]
+    
+    return{
+        "username": user.username,
+        "profile_picture": user.profile_picture,
+        "total_races": total_races,
+        "avg_wpm": avg_wpm,
+        "avg_accuracy": avg_accuracy,
+        "best_wpm": best_wpm, 
+        "recent_matches": recent_matches, 
+    }
 
 @app.websocket("/ws/{lobby_id}")
 async def websocket_endpoint(websocket: WebSocket, lobby_id: str):
