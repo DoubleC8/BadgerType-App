@@ -5,7 +5,7 @@ const getAccuracyColor = (accuracy) => {
       return "(--green)";
     case acc > 50:
       return "(--yellow)";
-    case acc < 50:
+    case acc <= 50:
       return "(--red)";
     default:
       return "(--text-secondary)";

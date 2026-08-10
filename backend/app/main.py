@@ -115,8 +115,11 @@ def get_user_stats(clerk_id: str, db: Session = Depends(get_session)):
     if not user:
         return {"error": "User not found"}
     
-    # CORRECT: order_by is attached to the select() statement before execution
-    matches = db.exec(select(Match).where(Match.player1_id == user.id).order_by(Match.created_at.desc())).all()
+    statement = select(Match).where(
+        (Match.player1_id == user.id) | (Match.player2_id == user.id)
+    ).order_by(Match.created_at.desc());
+    
+    matches = db.exec(statement).all()
     
     total_races = len(matches)
     
@@ -125,33 +128,61 @@ def get_user_stats(clerk_id: str, db: Session = Depends(get_session)):
             "username": user.username,
             "profile_picture": user.profile_picture,
             "total_races": 0,
+            "total_wins": 0,
+            "total_losses": 0,
             "avg_wpm": 0,
             "avg_accuracy": 0,
             "best_wpm": 0, 
-            "recent_matches": [],
+            "recent_solo_matches": [],
+            "recent_multiplayer_matches": [],
         }
+        
+    user_wpms = []
+    user_accs = []
+    recent_solo_matches = []
+    recent_multiplayer_matches = []
+    total_wins = 0
+    total_losses = 0
     
-    avg_wpm = round(sum(m.p1_wpm for m in matches) / total_races, 1)
-    avg_accuracy = round(sum(m.p1_accuracy for m in matches) / total_races, 1)
-    best_wpm = round(max(m.p1_wpm for m in matches), 1)
-    
-    recent_matches = [
-        {
-            "wpm": round(m.p1_wpm, 1),
-            "accuracy": round(m.p1_accuracy, 1),
+    for m in matches:
+        is_p1 = m.player1_id == user.id
+        wpm = m.p1_wpm if is_p1 else m.p2_wpm
+        acc = m.p1_accuracy if is_p1 else m.p2_accuracy
+        
+        user_wpms.append(wpm)
+        user_accs.append(acc)
+        
+        match_data = {
+            "wpm": round(wpm, 1),
+            "accuracy": round(acc, 1), 
             "date": m.created_at.strftime("%b %d, %Y")
         }
-        for m in matches[:10]
-    ]
+        
+        if m.player2_id is None:
+            if len(recent_solo_matches) < 10:
+                recent_solo_matches.append(match_data)
+            else:
+                if m.winner_id == user.id:
+                    total_wins += 1
+                    match_data["outcome"] = "W"
+                else:
+                    total_losses += 1
+                    match_data["outcome"] = "L"
+                
+                if len(recent_multiplayer_matches) < 10:
+                    recent_multiplayer_matches.append(match_data)
     
-    return{
+    return {
         "username": user.username,
         "profile_picture": user.profile_picture,
         "total_races": total_races,
-        "avg_wpm": avg_wpm,
-        "avg_accuracy": avg_accuracy,
-        "best_wpm": best_wpm, 
-        "recent_matches": recent_matches, 
+        "total_wins": total_wins,
+        "total_losses": total_losses,
+        "avg_wpm": round(sum(user_wpms) / total_races, 1),
+        "avg_accuracy": round(sum(user_accs) / total_races, 1),
+        "best_wpm": round(max(user_wpms), 1), 
+        "recent_solo_matches": recent_solo_matches,
+        "recent_multiplayer_matches": recent_multiplayer_matches, 
     }
 
 @app.websocket("/ws/{lobby_id}")
