@@ -17,6 +17,7 @@ const Arena = () => {
   const [quote, setQuote] = useState(
     location.state?.quote || "Fallback quote just in case!",
   );
+
   const [rematchRequested, setRematchRequested] = useState(false);
 
   const { userInput, startTime, endTime, wpm, accuracy, resetEngine } =
@@ -43,7 +44,16 @@ const Arena = () => {
 
   useEffect(() => {
     const ws = new WebSocket(`ws://localhost:8000/ws/${lobbyId}`);
-    ws.onopen = () => setSocket(ws);
+
+    ws.onopen = () => {
+      setSocket(ws);
+      ws.send(
+        JSON.stringify({
+          type: "join_match",
+          clerk_id: user?.id || null,
+        }),
+      );
+    };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -89,35 +99,25 @@ const Arena = () => {
   useEffect(() => {
     if (
       endTime &&
+      wpm > 0 &&
       socket &&
       socket.readyState === WebSocket.OPEN &&
       !hasBroadcastFinish.current
     ) {
       hasBroadcastFinish.current = true;
-      socket.send(JSON.stringify({ type: "finished" }));
-      setMatchResult((prev) => (prev ? prev : "Win"));
-    }
 
-    if (
-      endTime &&
-      wpm > 0 &&
-      socket &&
-      isSignedIn &&
-      user &&
-      !hasSavedMatch.current
-    ) {
-      hasSavedMatch.current = true;
-      fetch("http://localhost:8000/api/matches", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clerk_id: user.id,
+      socket.send(
+        JSON.stringify({
+          type: "finished",
+          clerk_id: user?.id || null,
           wpm: wpm,
           accuracy: accuracy,
         }),
-      }).catch((err) => console.error("Failed to save match: ", err));
+      );
+
+      setMatchResult((prev) => (prev ? prev : "Win"));
     }
-  }, [endTime, socket, isSignedIn, user, wpm, accuracy]);
+  }, [endTime, socket, user, wpm, accuracy]);
 
   return (
     <div className="w-full h-full flex flex-col gap-6 font-(family-name:--geist)">

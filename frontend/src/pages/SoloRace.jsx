@@ -53,7 +53,7 @@ const SoloRace = () => {
   }, [endTime, isSignedIn, user, wpm, accuracy]);
 
   return (
-    <div className="w-full h-full flex flex-col gap-6">
+    <div className="w-full h-full flex flex-col gap-6 mb-3">
       <div className="w-full flex justify-between">
         <Timer
           startTime={startTime}
