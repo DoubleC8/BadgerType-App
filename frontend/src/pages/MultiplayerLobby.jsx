@@ -54,7 +54,7 @@ const MultiplayerLobby = () => {
   };
 
   return (
-    <div className="w-full h-3/4 flex flex-col items-center justify-center gap-6">
+    <div className="w-full h-8/10 flex flex-col items-center justify-center gap-6">
       {playerCount < 2 ? (
         <TypewriterText title={"Waiting for opponent..."} />
       ) : (

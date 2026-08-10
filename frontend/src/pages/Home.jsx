@@ -11,7 +11,7 @@ const Home = () => {
   };
 
   return (
-    <div className="w-full h-3/4 flex flex-col items-center justify-center gap-6">
+    <div className="w-full h-8/10 flex flex-col items-center justify-center gap-6">
       <TypewriterText title={"Choose a Game Mode..."} />
       <div className="w-full flex justify-center gap-6">
         <Button

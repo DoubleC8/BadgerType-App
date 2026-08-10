@@ -30,7 +30,7 @@ const Profile = () => {
 
   if (!isLoaded || loading) {
     return (
-      <div className="w-full h-3/4 flex items-center justify-center text-4xl font-bold text-(--accent) animate-pulse">
+      <div className="w-full h-8/10 flex items-center justify-center text-4xl font-bold text-(--accent) animate-pulse">
         Loading Stats...
       </div>
     );
@@ -38,7 +38,7 @@ const Profile = () => {
 
   if (!isSignedIn) {
     return (
-      <div className="w-full h-3/4 flex flex-col gap-3 items-center justify-center text-4xl font-bold text-(--red)">
+      <div className="w-full h-8/10 flex flex-col gap-3 items-center justify-center text-4xl font-bold text-(--red)">
         <FaGhost />
         <p>Please sign in to view your profile and lifetime stats.</p>
       </div>
@@ -46,7 +46,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="w-full min-h-full h-fit bg-red-400 flex flex-col gap-6 font-(family-name:--geist)">
+    <div className="w-full h-screen pb-6 flex flex-col gap-6 font-(family-name:--geist)">
       <ProfileHeader stats={stats} />
 
       <ProfileStats stats={stats} />
