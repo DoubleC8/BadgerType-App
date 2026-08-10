@@ -11,6 +11,7 @@ class User(SQLModel, table=True):
 
 class Match(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    is_multiplayer: bool = Field(default=False)
     player1_id: uuid.UUID = Field(foreign_key="user.id")
     player2_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
     winner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")

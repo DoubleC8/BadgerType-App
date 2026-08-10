@@ -185,54 +185,102 @@ def get_user_stats(clerk_id: str, db: Session = Depends(get_session)):
         "recent_multiplayer_matches": recent_multiplayer_matches, 
     }
 
+# Don't forget to import Session and get_session at the top if they aren't already there!
 @app.websocket("/ws/{lobby_id}")
-async def websocket_endpoint(websocket: WebSocket, lobby_id: str):
-    # 1. Player calls in. The Switchboard Operator answers and puts them in the room.
+async def websocket_endpoint(websocket: WebSocket, lobby_id: str, db: Session = Depends(get_session)):
     connected = await manager.connect(websocket, lobby_id)
-    
     if not connected:
         return
     
     current_players = len(manager.active_lobbies[lobby_id])
+    await manager.broadcast({"type": "player_joined", "total_players": current_players}, lobby_id)
     
-    await manager.broadcast({
-        "type": "player_joined", 
-        "total_players": current_players
-    }, lobby_id)
-    
-    # --- The Game Start Logic ---
     if current_players == 2:
-        # Fetch the authoritative quote from the server
         game_quote = manager.fetch_game_quote()
+        await manager.broadcast({"type": "game_start", "quote": game_quote}, lobby_id)
         
-        await manager.broadcast({
-            "type": "game_start", 
-            "quote": game_quote
-        }, lobby_id)
-        
-    
     try:
-        # 2. Stay on the line forever, listening for any messages from this player
         while True:
-            # Wait for the player to send a message (like "I typed the letter A")
             data = await websocket.receive_json()            
             
-            if data.get("type") == "rematch":
+            # 1. Player checks in when they arrive in the Arena
+            if data.get("type") == "join_match":
+                if lobby_id not in manager.lobby_players:
+                    manager.lobby_players[lobby_id] = []
+                manager.lobby_players[lobby_id].append(data.get("clerk_id"))
+
+            # 2. The Rematch Logic
+            elif data.get("type") == "rematch":
                 manager.rematch_votes[lobby_id] += 1
-                
                 if manager.rematch_votes[lobby_id] == 2:
                     manager.rematch_votes[lobby_id] = 0
+                    manager.match_winners[lobby_id] = False # Reset the winner lock!
                     new_quote = manager.fetch_game_quote()
                     await manager.broadcast({"type": "game_start", "quote": new_quote}, lobby_id)
-                    
                 continue
+
+            # 3. The Authoritative Finish Line
+            elif data.get("type") == "finished":
+                # The FIRST person to trigger this block is the official winner!
+                if not manager.match_winners.get(lobby_id):
+                    manager.match_winners[lobby_id] = True
+                    
+                    winner_clerk = data.get("clerk_id")
+                    loser_clerk = None
+                    
+                    # Figure out who the loser was based on who checked in earlier
+                    for p in manager.lobby_players.get(lobby_id, []):
+                        if p != winner_clerk:
+                            loser_clerk = p
+                            break
+
+                    # Lookup both users in the database (Guests will return None)
+                    w_user = db.exec(select(User).where(User.clerk_id == winner_clerk)).first() if winner_clerk else None
+                    l_user = db.exec(select(User).where(User.clerk_id == loser_clerk)).first() if loser_clerk else None
+
+                    # Only save to the database if at least ONE player is registered
+                    if w_user or l_user:
+                        if w_user:
+                            # Registered user WON
+                            p1_id = w_user.id
+                            p2_id = l_user.id if l_user else None
+                            win_id = w_user.id
+                            p1_w = data.get("wpm")
+                            p1_a = data.get("accuracy")
+                            p2_w = 0.0 # Loser hasn't finished, so 0 is fine for MVP
+                            p2_a = 0.0
+                        else:
+                            # Guest WON, Registered user LOST
+                            p1_id = l_user.id
+                            p2_id = None
+                            win_id = None # Guest win
+                            p1_w = 0.0 # Registered user hasn't finished
+                            p1_a = 0.0
+                            p2_w = data.get("wpm") # Guest stats
+                            p2_a = data.get("accuracy")
+                        
+                        new_match = Match(
+                            is_multiplayer=True,
+                            player1_id=p1_id,
+                            player2_id=p2_id,
+                            winner_id=win_id,
+                            p1_wpm=p1_w,
+                            p1_accuracy=p1_a,
+                            p2_wpm=p2_w,
+                            p2_accuracy=p2_a
+                        )
+                        db.add(new_match)
+                        db.commit()
+
+                # Still broadcast the finished message so the loser's React screen updates!
+                await manager.broadcast(data, lobby_id, sender=websocket)
             
-            await manager.broadcast(data, lobby_id, sender=websocket)
+            else:
+                # Normal progress updates
+                await manager.broadcast(data, lobby_id, sender=websocket)
             
     except WebSocketDisconnect:
-        # 3. If the player closes their browser tab, the Operator hangs up the phone
         manager.disconnect(websocket, lobby_id)
-        
         remaining_players = len(manager.active_lobbies.get(lobby_id, []))
         await manager.broadcast({"type": "player_left", "total_players": remaining_players}, lobby_id)
         

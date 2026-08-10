@@ -11,6 +11,10 @@ class ConnectionManager:
         
         # Track rematch votes per lobby
         self.rematch_votes: dict[str, int] = {}
+        
+        # Tracking players and winners
+        self.lobby_players: dict[str, list[str]] = {} 
+        self.match_winners: dict[str, bool] = {}
     
     def fetch_game_quote(self):
         try:
