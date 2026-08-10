@@ -158,19 +158,20 @@ def get_user_stats(clerk_id: str, db: Session = Depends(get_session)):
             "date": m.created_at.strftime("%b %d, %Y")
         }
         
-        if m.player2_id is None:
+
+        if not m.is_multiplayer:
             if len(recent_solo_matches) < 10:
                 recent_solo_matches.append(match_data)
+        else:
+            if m.winner_id == user.id:
+                total_wins += 1
+                match_data["outcome"] = "W"
             else:
-                if m.winner_id == user.id:
-                    total_wins += 1
-                    match_data["outcome"] = "W"
-                else:
-                    total_losses += 1
-                    match_data["outcome"] = "L"
-                
-                if len(recent_multiplayer_matches) < 10:
-                    recent_multiplayer_matches.append(match_data)
+                total_losses += 1
+                match_data["outcome"] = "L"
+            
+            if len(recent_multiplayer_matches) < 10:
+                recent_multiplayer_matches.append(match_data)
     
     return {
         "username": user.username,
