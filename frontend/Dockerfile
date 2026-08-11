@@ -1,17 +1,18 @@
 # ==========================================
 # STAGE 1: Build the React App
 # ==========================================
-FROM node:18-alpine as builder
+FROM node:20-alpine AS builder
 
-# Set the working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
 COPY package.json package-lock.json* ./
 RUN npm install
 
-# Copy the rest of the frontend code
 COPY . .
+
+# NEW: Accept the Clerk key as a build argument!
+ARG VITE_CLERK_PUBLISHABLE_KEY
+ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
 
 # Build the Vite project for production
 RUN npm run build
