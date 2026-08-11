@@ -12,7 +12,9 @@ const MultiplayerLobby = () => {
 
   useEffect(() => {
     // 1. Dial the FastAPI Switchboard when the lobby mounts
-    const ws = new WebSocket(`ws://localhost:8000/ws/${lobbyId}`);
+    const ws = new WebSocket(
+      `wss://badgertype-backend-597162430503.us-west2.run.app/ws/${lobbyId}`,
+    );
 
     ws.onopen = () => {
       console.log(`Connected to lobby: ${lobbyId}`);

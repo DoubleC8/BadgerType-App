@@ -1,0 +1,13 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - "build"
+      - "--build-arg"
+      - "VITE_CLERK_PUBLISHABLE_KEY=pk_test_YXB0LWJ1bm55LTYxLmNsZXJrLmFjY291bnRzLmRldiQ"
+      - "-t"
+      - "${_IMAGE}"
+      - "."
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "${_IMAGE}"]
+images:
+  - "${_IMAGE}"

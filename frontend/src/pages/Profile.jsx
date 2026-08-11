@@ -14,7 +14,9 @@ const Profile = () => {
 
   useEffect(() => {
     if (isLoaded && isSignedIn && user) {
-      fetch(`http://localhost:8000/api/users/${user.id}/stats`)
+      fetch(
+        `https://badgertype-backend-597162430503.us-west2.run.app/api/users/${user.id}/stats`,
+      )
         .then((res) => res.json())
         .then((data) => {
           setStats(data);

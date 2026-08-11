@@ -8,19 +8,22 @@ const AuthSync = () => {
   useEffect(() => {
     if (isLoaded && isSignedIn && user) {
       // Dial the new FastAPI route
-      fetch("http://localhost:8000/api/auth/sync", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      fetch(
+        "https://badgertype-backend-597162430503.us-west2.run.app/api/auth/sync",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            clerk_id: user.id,
+            // Fallback logic because GitHub might not provide a username immediately
+            username:
+              user.username || user.firstName || `user_${user.id.slice(0, 6)}`,
+            profile_picture: user.imageUrl,
+          }),
         },
-        body: JSON.stringify({
-          clerk_id: user.id,
-          // Fallback logic because GitHub might not provide a username immediately
-          username:
-            user.username || user.firstName || `user_${user.id.slice(0, 6)}`,
-          profile_picture: user.imageUrl,
-        }),
-      }).catch((err) => console.error("Failed to sync user with Neon:", err));
+      ).catch((err) => console.error("Failed to sync user with Neon:", err));
     }
   }, [isLoaded, isSignedIn, user]);
 

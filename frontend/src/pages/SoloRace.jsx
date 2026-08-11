@@ -40,15 +40,18 @@ const SoloRace = () => {
   useEffect(() => {
     if (endTime && wpm > 0 && user && isSignedIn && !hasSavedMatch.current) {
       hasSavedMatch.current = true;
-      fetch("http://localhost:8000/api/matches", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clerk_id: user.id,
-          wpm: wpm,
-          accuracy: accuracy,
-        }),
-      }).catch((err) => console.error("Failed to save solo match: ", err));
+      fetch(
+        "https://badgertype-backend-597162430503.us-west2.run.app/api/matches",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clerk_id: user.id,
+            wpm: wpm,
+            accuracy: accuracy,
+          }),
+        },
+      ).catch((err) => console.error("Failed to save solo match: ", err));
     }
   }, [endTime, isSignedIn, user, wpm, accuracy]);
 

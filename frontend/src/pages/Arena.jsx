@@ -43,7 +43,9 @@ const Arena = () => {
   };
 
   useEffect(() => {
-    const ws = new WebSocket(`ws://localhost:8000/ws/${lobbyId}`);
+    const ws = new WebSocket(
+      `wss://badgertype-backend-597162430503.us-west2.run.app/ws/${lobbyId}`,
+    );
 
     ws.onopen = () => {
       setSocket(ws);
