@@ -80,7 +80,7 @@ const MultiplayerLobby = () => {
               Send this link to a friend to play:
             </p>
             <div className="w-full flex gap-3 items-center">
-              <code className="h-12 w-7/10 px-3 py-1 flex flex-col justify-center bg-(--border) rounded-lg text-(--accent) text-xl overflow-clip">
+              <code className="h-12 w-7/10 px-3 py-1 flex flex-col justify-center bg-(--border) rounded-lg text-(--accent) text-xl overflow-auto">
                 {window.location.href}
               </code>
               <button
