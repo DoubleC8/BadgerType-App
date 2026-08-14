@@ -1,4 +1,4 @@
-#!/Users/christophercortes/Downloads/Projects/personal-portfolio-projects/swe-projects/badger-type-app/backend/venv/bin/python3
+#!/Users/christophercortes/Documents/projects/personal-portfolio-projects/swe-projects/badger-type-app/backend/venv/bin/python3.14
 import sys
 from charset_normalizer.cli import cli_detect
 if __name__ == '__main__':
