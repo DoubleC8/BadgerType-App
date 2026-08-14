@@ -13,7 +13,11 @@ const ProfileHeader = ({ stats }) => {
         <p className="text-xl text-(--text-secondary)">
           BadgerType Racer •{" "}
           <span className="text-(--accent) font-extrabold">
-            {stats?.total_races || 0} Races Completed
+            {stats?.total_races == 0
+              ? "No Races Completed Yet"
+              : stats?.total_races > 1
+                ? `${stats.total_races} Races Completed`
+                : `${stats.total_races} Race Completed`}
           </span>
           {" • "}
           <span className="text-(--green) font-extrabold">
