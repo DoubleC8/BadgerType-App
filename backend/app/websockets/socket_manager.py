@@ -15,6 +15,9 @@ class ConnectionManager:
         # Tracking players and winners
         self.lobby_players: dict[str, list[str]] = {} 
         self.match_winners: dict[str, bool] = {}
+        
+        self.match_finished: dict[str, bool] = {}
+        self.game_in_progress: dict[str, bool] = {}
     
     def fetch_game_quote(self):
         try:
@@ -69,8 +72,11 @@ class ConnectionManager:
                 del self.active_lobbies[lobby_id]
                 print(f"Lobby {lobby_id} deleted.")
                 
-                if lobby_id in self.rematch_votes:
-                    del self.rematch_votes[lobby_id]
+                self.rematch_votes.pop(lobby_id, None)
+                self.lobby_players.pop(lobby_id, None)
+                self.match_winners.pop(lobby_id, None)
+                self.match_finished.pop(lobby_id, None)
+                self.game_in_progress.pop(lobby_id, None)
 
     async def broadcast(self, message: dict, lobby_id: str, sender: WebSocket = None):
         if lobby_id in self.active_lobbies:

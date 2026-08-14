@@ -197,8 +197,11 @@ async def websocket_endpoint(websocket: WebSocket, lobby_id: str, db: Session = 
     await manager.broadcast({"type": "player_joined", "total_players": current_players}, lobby_id)
     
     if current_players == 2:
-        game_quote = manager.fetch_game_quote()
-        await manager.broadcast({"type": "game_start", "quote": game_quote}, lobby_id)
+        quote = await manager.fetch_game_quote()
+        manager.match_finished[lobby_id] = False
+        manager.game_in_progress[lobby_id] = True # <-- OFFICIALLY START THE GAME
+        await manager.broadcast({"type": "game_start", "quote": quote}, lobby_id)
+
         
     try:
         while True:
@@ -216,12 +219,24 @@ async def websocket_endpoint(websocket: WebSocket, lobby_id: str, db: Session = 
                 if manager.rematch_votes[lobby_id] == 2:
                     manager.rematch_votes[lobby_id] = 0
                     manager.match_winners[lobby_id] = False # Reset the winner lock!
+                    
+                    manager.match_finished[lobby_id] = False
+                    manager.game_in_progress[lobby_id] = True 
+                    
                     new_quote = manager.fetch_game_quote()
                     await manager.broadcast({"type": "game_start", "quote": new_quote}, lobby_id)
                 continue
 
             # 3. The Authoritative Finish Line
             elif data.get("type") == "finished":
+            
+                if not manager.game_in_progress.get(lobby_id, False):
+                    continue 
+                
+                if not manager.match_finished.get(lobby_id, False):
+                    manager.match_finished[lobby_id] = True
+                    manager.game_in_progress[lobby_id] = False
+
                 # The FIRST person to trigger this block is the official winner!
                 if not manager.match_winners.get(lobby_id):
                     manager.match_winners[lobby_id] = True
