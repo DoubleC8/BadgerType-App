@@ -17,13 +17,13 @@ const Home = () => {
         <Button
           onAction={() => navigate("/solo")}
           title={"Solo"}
-          buttonColor={"bg-secondary"}
+          buttonColor={"bg-(--bg-secondary)"}
           textColor={"text-secondary"}
         />
         <Button
           onAction={createLobby}
           title={"Multiplayer"}
-          buttonColor={"accent"}
+          buttonColor={"bg-(--accent)"}
           textColor={"text"}
         />
       </div>

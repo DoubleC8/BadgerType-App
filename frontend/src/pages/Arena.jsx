@@ -43,6 +43,12 @@ const Arena = () => {
   };
 
   useEffect(() => {
+    if (!location.state?.quote) {
+      navigate(`/lobby/${lobbyId}`);
+    }
+  }, [location, navigate, lobbyId]);
+
+  useEffect(() => {
     const ws = new WebSocket(
       `wss://badgertype-backend-597162430503.us-west2.run.app/ws/${lobbyId}`,
     );
@@ -74,6 +80,7 @@ const Arena = () => {
         setMatchResult(null);
         setOpponentProgress(0);
         setRematchRequested(false);
+        setOpponentLeft(false);
         resetEngine();
 
         hasBroadcastFinish.current = false;
@@ -137,30 +144,28 @@ const Arena = () => {
       <TypingDisplay quote={quote} userInput={userInput} multiplayer={true} />
       {matchResult && (
         <div className="w-full flex items-center justify-center gap-6">
-          {rematchRequested ? (
-            opponentLeft ? (
-              <p className="text-2xl text-(--red) font-bold animate-pulse">
-                Opponent has left the lobby.
-              </p>
-            ) : (
-              <div className="w-1/5 h-13 p-3 flex items-center justify-center bg-(--bg-secondary) border-2 border-dashed border-(--accent) text-(--text-secondary) rounded-lg text-xl font-bold">
-                <p className="animate-pulse">Waiting for opponent...</p>
-              </div>
-            )
+          {opponentLeft ? (
+            <p className="text-2xl text-(--red) font-bold animate-pulse">
+              Opponent has left the lobby.
+            </p>
+          ) : rematchRequested ? (
+            <div className="w-1/5 h-13 p-3 flex items-center justify-center bg-(--bg-secondary) border-2 border-dashed border-(--accent) text-(--text-secondary) rounded-lg text-xl font-bold">
+              <p className="animate-pulse">Waiting for opponent...</p>
+            </div>
           ) : (
             <Button
               onAction={handleRematch}
               title={"Rematch"}
-              buttonColor={"accent"}
-              textColor={"text"}
+              buttonColor={"bg-(--accent)"}
+              textColor={"text-(--text)"}
             />
           )}
 
           <Button
             onAction={leaveMatch}
             title={"Leave"}
-            buttonColor={"red"}
-            textColor={"text"}
+            buttonColor={"bg-(--red)"}
+            textColor={"text-(--text)"}
           />
         </div>
       )}
